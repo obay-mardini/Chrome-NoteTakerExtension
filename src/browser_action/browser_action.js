@@ -13,7 +13,7 @@ function optionChange () {
       textToHighlight: [],
       textToUnhighlight: []
     };
-    
+
     //unHighlight all notes
     $('#dropdown').find('option').each(function(index,element){
       if (element.text) {
@@ -35,10 +35,10 @@ function optionChange () {
       var text = $currentOption.text();
       changes.textToHighlight.push(text);
     }
-    
+
     //Send object of text to highlight
     commitChanges(changes);
-    
+
     //Set currentTextIndex back to 0
     chrome.storage.local.set({
       currentTextIndex: 0
@@ -69,7 +69,7 @@ function scroll() {
 //Make call to server to get User
 function getUsers () {
   $.ajax({
-    url: 'https://noteextension.herokuapp.com/api/users/' + userID,
+    url: 'http://localhost:3003/api/users/' + userID,
     type: 'GET',
     success: (data) => {
       allNotes = data;
@@ -86,7 +86,7 @@ function button() {
   $("#button").on("click", function(){
     var currentUri;
 
-    //Get current tab url 
+    //Get current tab url
     chrome.tabs.getSelected(null, (tab) => {
       currentUri = tab.url;
     });
@@ -95,14 +95,14 @@ function button() {
     chrome.tabs.executeScript({
       code: "window.getSelection().toString();"
     }, (selection) => {
-    
+
       var text = selection[0];
       var note = {name: user, uri: currentUri, note: text};
 
       $.ajax({
         type: 'POST',
         contentType: 'application/json',
-        url: 'https://noteextension.herokuapp.com/api/users/notes',
+        url: 'http://localhost:3003/api/users/notes',
         data: JSON.stringify(note),
         success: (data) => {
           console.log('SUCCESS!');
@@ -140,7 +140,7 @@ function renderOption(data) {
       label: "--Select--",
       value: SELECT_VALUE
     }));
-    
+
     $dropdown.append($("<option/>", {
       label: "--All--",
       value: ALL_VALUE
@@ -167,7 +167,7 @@ function renderProfileView(authResult) {
   $('.mainPopup').removeClass('hidden');
   $('.default').addClass('hidden');
   $('.loading').removeClass('hidden');
-  
+
   fetch(`https://${env.AUTH0_DOMAIN}/userinfo`, {
     headers: {
       'Authorization': `Bearer ${authResult.access_token}`
@@ -194,7 +194,7 @@ function renderDefaultView() {
   $('.login-button').get(0).addEventListener('click', () => {
   $('.default').addClass('hidden');
   $('.loading').removeClass('hidden');
-  
+
   chrome.runtime.sendMessage({
       type: "authenticate"
     });
