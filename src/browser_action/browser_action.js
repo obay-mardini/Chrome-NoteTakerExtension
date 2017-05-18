@@ -97,7 +97,7 @@ function button() {
     }, (selection) => {
 
       var text = selection[0];
-      var note = {name: user, uri: currentUri, note: text};
+      var note = {user_id: userID, uri: currentUri, note: text};
 
       $.ajax({
         type: 'POST',
