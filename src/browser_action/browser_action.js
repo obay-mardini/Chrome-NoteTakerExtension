@@ -4,46 +4,49 @@ var allNotes;
 var SELECT_VALUE = 'select';
 var ALL_VALUE = 'all';
 //Load event listener for dropdown
-function optionChange () {
+function optionChange (val) {
   $('#dropdown').change(function() {
-    var value = $(this).val();
-    var changes = {
-      textToHighlight: [],
-      textToUnhighlight: []
-    };
-
-    //unHighlight all notes
-    $('#dropdown').find('option').each(function(index,element){
-      if (element.text) {
-        changes.textToUnhighlight.push(element.text);
-      }
-    });
-
-    //If selecting --all-- in dropdown
-    if (value === ALL_VALUE) {
-      arrayOfText = [];
-      $('#dropdown').find('option').each(function(index,element){
-        if (element.text) {
-          changes.textToHighlight.push(element.text);
-        }
-      });
-    } //If selecting anything, but --select--
-    else if (value !== SELECT_VALUE) {
-      var $currentOption = $('#dropdown option[value=' + value + ']');
-      var text = $currentOption.text();
-      changes.textToHighlight.push(text);
-    }
-
-    //Send object of text to highlight
-    commitChanges(changes);
-
-    //Set currentTextIndex back to 0
-    chrome.storage.local.set({
-      currentTextIndex: 0
-    });
-  });
+   var value = $(this).val();
+   selectLabel(value);
+ });
 }
 
+function selectLabel(value) {
+  var changes = {
+    textToHighlight: [],
+    textToUnhighlight: []
+  };
+
+  //unHighlight all notes
+  $('#dropdown').find('option').each(function(index,element){
+    if (element.text) {
+      changes.textToUnhighlight.push(element.text);
+    }
+  });
+
+  //If selecting --all-- in dropdown
+  if (value === ALL_VALUE) {
+    arrayOfText = [];
+    $('#dropdown').find('option').each(function(index,element){
+      if (element.text) {
+        changes.textToHighlight.push(element.text);
+      }
+    });
+  } //If selecting anything, but --select--
+  else if (value !== SELECT_VALUE) {
+    var $currentOption = $('#dropdown option[value=' + value + ']');
+    var text = $currentOption.text();
+    changes.textToHighlight.push(text);
+  }
+
+  //Send object of text to highlight
+  commitChanges(changes);
+
+  //Set currentTextIndex back to 0
+  chrome.storage.local.set({
+    currentTextIndex: 0
+  });
+}
 //Set a change object on chrome local storage
 function commitChanges (changes) {
   chrome.storage.local.set({
