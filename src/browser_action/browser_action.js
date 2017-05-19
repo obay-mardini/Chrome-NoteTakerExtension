@@ -247,5 +247,4 @@ chrome.runtime.onInstalled.addListener(function() {
    }, function() {
     alert(chrome.extension.lastError.message)
      });
-})
-
+});
