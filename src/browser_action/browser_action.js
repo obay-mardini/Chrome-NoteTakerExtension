@@ -1,10 +1,8 @@
 var user;
 var userID;
 var allNotes;
-
 var SELECT_VALUE = 'select';
 var ALL_VALUE = 'all';
-
 //Load event listener for dropdown
 function optionChange () {
   $('#dropdown').change(function() {
@@ -83,40 +81,7 @@ function getUsers () {
 
 //Load event listener for "Noted" button
 function button() {
-  $("#button").on("click", function(){
-    var currentUri;
-
-    //Get current tab url
-    chrome.tabs.getSelected(null, (tab) => {
-      currentUri = tab.url;
-    });
-
-    //Get selected highlight color
-    var highlightColor = $("input[name=color]:checked").val();
-
-    //Get hightlighted text from browser
-    chrome.tabs.executeScript({
-      code: "window.getSelection().toString();"
-    }, (selection) => {
-
-      var text = selection[0];
-      var note = {user_id: userID, uri: currentUri, note: text, color: highlightColor};
-
-      $.ajax({
-        type: 'POST',
-        contentType: 'application/json',
-        url: 'http://localhost:3003/api/users/notes',
-        data: JSON.stringify(note),
-        success: (data) => {
-          console.log('SUCCESS!');
-          getUsers();
-        },
-        error: (data) => {
-          console.log('Did not receive:' + data);
-        }
-      });
-    });
-  });
+  $("#button").on("click",highlightSelectedText);
 }
 
 //Checks if user is login for Auth0
@@ -152,8 +117,7 @@ function renderOption(data) {
     if(data.length !== 0) {
       data[0].urls.forEach(function(url) {
         if(url.name === tab.url) {
-          url.pins.forEach(function(noteObj, index) {
-            var note = JSON.parse(noteObj).note;
+          url.pins.forEach(function(note, index) {
             $dropdown.append($("<option/>", {
               label: `Pin ${index + 1}: ${note.slice(0, 15)}...`,
               value: index,
@@ -171,8 +135,8 @@ function renderProfileView(authResult) {
   $('.mainPopup').removeClass('hidden');
   $('.default').addClass('hidden');
   $('.loading').removeClass('hidden');
-
-  fetch(`https://${env.AUTH0_DOMAIN}/userinfo`, {
+  
+  return fetch(`https://${env.AUTH0_DOMAIN}/userinfo`, {
     headers: {
       'Authorization': `Bearer ${authResult.access_token}`
     }
@@ -182,11 +146,17 @@ function renderProfileView(authResult) {
     user = profile.email;
     userID = profile.user_id;
     getUsers();
-
-    $('.loading').addClass('hidden');
-    $('.note').removeClass('hidden');
-    $('.logout-button').get(0).addEventListener('click', logout);
-  });
+    try {
+      $('.loading').addClass('hidden');
+      $('.note').removeClass('hidden');
+      $('.logout-button').get(0).addEventListener('click', logout);
+    } catch(e) {
+      console.log(e);
+    }
+    return;
+  }).catch(e => {
+    alert('ERROR',e)
+  })
 }
 
 //Render the login page
@@ -217,12 +187,46 @@ function main () {
   }
 }
 
+function highlightSelectedText(info, tab) {
+  var authResult = JSON.parse(localStorage.authResult || '{}')
+  var currentUri;
+  renderProfileView(authResult).then(() => {
+
+  //Get current tab url
+  chrome.tabs.getSelected(null, (tab) => {
+    currentUri = tab.url;
+  });
+
+  //Get selected highlight color
+  var highlightColor = $("input[name=color]:checked").val();
+  
+  //Get hightlighted text from browser
+  chrome.tabs.executeScript({
+    code: "window.getSelection().toString();"
+  }, (selection) => {
+
+    var text = selection[0];
+    var note = {user_id: userID, uri: currentUri, note: text};
+    $.ajax({
+      type: 'POST',
+      contentType: 'application/json',
+      url: 'http://localhost:3003/api/users/notes',
+      data: JSON.stringify(note),
+      success: (data) => {
+        console.log('SUCCESS!');
+      },
+      error: (data) => {
+        console.log('Did not receive:' + data);
+      }
+    });
+  });
+  });
+}
 //Injects Jquery, Jquery.highlight, and CSS into current tab
 document.addEventListener("DOMContentLoaded", () => {
   var result = chrome.tabs.executeScript(null, {file: "jquery-3.2.1.min.js"});
   var result2 = chrome.tabs.executeScript(null, {file: "jquery.highlight.js"});
   chrome.tabs.insertCSS(null, {file:"noteTakerHighlight.css"});
-
 //Run event listeners
   Promise.all([result, result2]).then(() => {
     main();
@@ -231,3 +235,15 @@ document.addEventListener("DOMContentLoaded", () => {
     scroll();
   });
 });
+  chrome.contextMenus.onClicked.addListener(highlightSelectedText)
+
+  chrome.runtime.onInstalled.addListener(function() {
+    var context = "selection";
+    chrome.contextMenus.create({
+        "id": "11112",
+        "title": "Note",
+        "contexts": [context]
+     }, function() {
+      alert(chrome.extension.lastError.message)
+       });
+  })
