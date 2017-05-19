@@ -69,7 +69,7 @@ function scroll() {
 
 //Make call to server to get User
 function getUsers () {
-  $.ajax({
+  return $.ajax({
     url: 'http://localhost:3003/api/users/' + userID,
     type: 'GET',
     success: (data) => {
@@ -148,7 +148,9 @@ function renderProfileView(authResult) {
   }).then((profile) => {
     user = profile.email;
     userID = profile.user_id;
-    getUsers();
+    getUsers().then(() => {
+      selectLabel(ALL_VALUE);
+    });
     try {
       $('.loading').addClass('hidden');
       $('.note').removeClass('hidden');
