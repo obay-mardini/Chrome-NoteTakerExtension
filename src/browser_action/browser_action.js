@@ -191,7 +191,6 @@ function highlightSelectedText(info, tab) {
   var authResult = JSON.parse(localStorage.authResult || '{}')
   var currentUri;
   renderProfileView(authResult).then(() => {
-
   //Get current tab url
   chrome.tabs.getSelected(null, (tab) => {
     currentUri = tab.url;
@@ -199,7 +198,7 @@ function highlightSelectedText(info, tab) {
 
   //Get selected highlight color
   var highlightColor = $("input[name=color]:checked").val();
-  
+
   //Get hightlighted text from browser
   chrome.tabs.executeScript({
     code: "window.getSelection().toString();"
@@ -207,6 +206,7 @@ function highlightSelectedText(info, tab) {
 
     var text = selection[0];
     var note = {user_id: userID, uri: currentUri, note: text};
+
     $.ajax({
       type: 'POST',
       contentType: 'application/json',
@@ -222,12 +222,14 @@ function highlightSelectedText(info, tab) {
   });
   });
 }
+
 //Injects Jquery, Jquery.highlight, and CSS into current tab
 document.addEventListener("DOMContentLoaded", () => {
+  console.count('here');
   var result = chrome.tabs.executeScript(null, {file: "jquery-3.2.1.min.js"});
   var result2 = chrome.tabs.executeScript(null, {file: "jquery.highlight.js"});
   chrome.tabs.insertCSS(null, {file:"noteTakerHighlight.css"});
-//Run event listeners
+  //Run event listeners
   Promise.all([result, result2]).then(() => {
     main();
     button();
@@ -235,15 +237,16 @@ document.addEventListener("DOMContentLoaded", () => {
     scroll();
   });
 });
-  chrome.contextMenus.onClicked.addListener(highlightSelectedText)
 
-  chrome.runtime.onInstalled.addListener(function() {
-    var context = "selection";
-    chrome.contextMenus.create({
-        "id": "11112",
-        "title": "Note",
-        "contexts": [context]
-     }, function() {
-      alert(chrome.extension.lastError.message)
-       });
-  })
+chrome.contextMenus.onClicked.addListener(highlightSelectedText)
+
+chrome.runtime.onInstalled.addListener(function() {
+  var context = "selection";
+  chrome.contextMenus.create({
+      "id": "11112",
+      "title": "Note",
+      "contexts": [context]
+   }, function() {
+    alert(chrome.extension.lastError.message)
+     });
+})
