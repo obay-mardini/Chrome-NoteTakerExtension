@@ -198,7 +198,7 @@ function highlightSelectedText(info, tab) {
 
   //Get selected highlight color
   var highlightColor = $("input[name=color]:checked").val();
-
+  
   //Get hightlighted text from browser
   chrome.tabs.executeScript({
     code: "window.getSelection().toString();"
@@ -206,7 +206,7 @@ function highlightSelectedText(info, tab) {
 
     var text = selection[0];
     var note = {user_id: userID, uri: currentUri, note: text};
-
+    
     $.ajax({
       type: 'POST',
       contentType: 'application/json',
