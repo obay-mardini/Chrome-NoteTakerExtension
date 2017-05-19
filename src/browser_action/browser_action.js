@@ -222,10 +222,8 @@ function highlightSelectedText(info, tab) {
   });
   });
 }
-
 //Injects Jquery, Jquery.highlight, and CSS into current tab
 document.addEventListener("DOMContentLoaded", () => {
-  console.count('here');
   var result = chrome.tabs.executeScript(null, {file: "jquery-3.2.1.min.js"});
   var result2 = chrome.tabs.executeScript(null, {file: "jquery.highlight.js"});
   chrome.tabs.insertCSS(null, {file:"noteTakerHighlight.css"});
@@ -250,3 +248,4 @@ chrome.runtime.onInstalled.addListener(function() {
     alert(chrome.extension.lastError.message)
      });
 })
+
