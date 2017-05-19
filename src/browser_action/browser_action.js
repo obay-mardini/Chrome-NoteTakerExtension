@@ -105,8 +105,7 @@ function renderOption(data) {
   var $dropdown = $('#dropdown');
   $dropdown.find('option').remove().end();
 
-  chrome.tabs.getSelected(null, (tab) => {
-    console.log('getSelected :', data);
+  return chrome.tabs.getSelected(null, (tab) => {
     $dropdown.append($("<option/>", {
       label: "--Select--",
       value: SELECT_VALUE
@@ -130,7 +129,7 @@ function renderOption(data) {
         }
       });
     }
-  });
+  })
 }
 
 //Render the Main App
