@@ -20,23 +20,28 @@ function selectLabel(value) {
   //unHighlight all notes
   $('#dropdown').find('option').each(function(index,element){
     if (element.text) {
-      changes.textToUnhighlight.push(element.text);
+      var text = element.text;
+      var color = element.getAttribute('color');
+      changes.textToUnhighlight.push({note: text, color: color});
     }
   });
 
   //If selecting --all-- in dropdown
   if (value === ALL_VALUE) {
     arrayOfText = [];
-    $('#dropdown').find('option').each(function(index,element){
+    $('#dropdown').find('option').each(function(index, element){
       if (element.text) {
-        changes.textToHighlight.push(element.text);
+        var text = element.text;
+        var color = element.getAttribute('color');
+        changes.textToHighlight.push({note: text, color: color});
       }
     });
   } //If selecting anything, but --select--
   else if (value !== SELECT_VALUE) {
     var $currentOption = $('#dropdown option[value=' + value + ']');
     var text = $currentOption.text();
-    changes.textToHighlight.push(text);
+    var color = $currentOption[0].attributes[2].value;
+    changes.textToHighlight.push({note: text, color: color});
   }
 
   //Send object of text to highlight
@@ -83,8 +88,41 @@ function getUsers () {
 };
 
 //Load event listener for "Noted" button
-function button() {
-  $("#button").on("click",highlightSelectedText);
+function notedBtn() {
+  $("#button").on("click", function(){
+    var currentUri;
+
+    //Get current tab url
+    chrome.tabs.getSelected(null, (tab) => {
+      currentUri = tab.url;
+    });
+
+    //Get selected highlight color
+    var highlightColor = $("input[name=color]:checked").val();
+
+    //Get hightlighted text from browser
+    chrome.tabs.executeScript({
+      code: "window.getSelection().toString();"
+    }, (selection) => {
+
+      var text = selection[0];
+      var note = {user_id: userID, uri: currentUri, note: text, color: highlightColor};
+
+      $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        url: 'http://localhost:3003/api/users/notes',
+        data: JSON.stringify(note),
+        success: (data) => {
+          console.log('SUCCESS!');
+          getUsers();
+        },
+        error: (data) => {
+          console.log('Did not receive: ' + JSON.stringify(data));
+        }
+      });
+    });
+  });
 }
 
 function annotationBtn() {
@@ -127,11 +165,12 @@ function renderOption(data) {
     if(data.length !== 0) {
       data[0].urls.forEach(function(url) {
         if(url.name === tab.url) {
-          url.pins.forEach(function(note, index) {
+          url.pins.forEach(function(noteObj, index) {
             $dropdown.append($("<option/>", {
-              label: `Pin ${index + 1}: ${note.text.slice(0, 15)}...`,
+              label: `Pin ${index + 1}: ${noteObj.text.slice(0, 15)}...`,
               value: index,
-              text: note.text
+              text: noteObj.text,
+              color: noteObj.color,
             }));
           });
         }
@@ -199,41 +238,6 @@ function main () {
   }
 }
 
-function highlightSelectedText(info, tab) {
-  var authResult = JSON.parse(localStorage.authResult || '{}')
-  var currentUri;
-  renderProfileView(authResult).then(() => {
-  //Get current tab url
-  chrome.tabs.getSelected(null, (tab) => {
-    currentUri = tab.url;
-  });
-
-  //Get selected highlight color
-  var highlightColor = $("input[name=color]:checked").val();
-
-  //Get hightlighted text from browser
-  chrome.tabs.executeScript({
-    code: "window.getSelection().toString();"
-  }, (selection) => {
-
-    var text = selection[0];
-    var note = {user_id: userID, uri: currentUri, note: text};
-
-    $.ajax({
-      type: 'POST',
-      contentType: 'application/json',
-      url: 'http://localhost:3003/api/users/notes',
-      data: JSON.stringify(note),
-      success: (data) => {
-        console.log('SUCCESS!');
-      },
-      error: (data) => {
-        console.log('Did not receive:' + data);
-      }
-    });
-  });
-  });
-}
 //Injects Jquery, Jquery.highlight, and CSS into current tab
 document.addEventListener("DOMContentLoaded", () => {
   var result = chrome.tabs.executeScript(null, {file: "jquery-3.2.1.min.js"});
@@ -242,7 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //Run event listeners
   Promise.all([result, result2]).then(() => {
     main();
-    button();
+    notedBtn();
     optionChange();
     scroll();
     annotationBtn();
