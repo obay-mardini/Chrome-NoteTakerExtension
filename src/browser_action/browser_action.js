@@ -87,6 +87,14 @@ function button() {
   $("#button").on("click",highlightSelectedText);
 }
 
+function annotationBtn() {
+  $('#annotation-btn').on('click', function() {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, "toggle");
+    });
+  });
+}
+
 //Checks if user is login for Auth0
 function isLoggedIn(token) {
   // The user is logged in if their token isn't expired
@@ -237,6 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
     button();
     optionChange();
     scroll();
+    annotationBtn();
   });
 });
 

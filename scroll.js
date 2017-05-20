@@ -4,11 +4,17 @@ chrome.storage.local.get('currentTextIndex', function(results) {
 
   if (element.length !== 0) {
     $('body').animate({
-      scrollTop: element.eq(results).offset().top     
+      scrollTop: element.eq(results).offset().top
     }, 500);
   }
 
-  chrome.storage.local.set({
-    currentTextIndex: results + 1
-  });
+  if (results === element.length - 1) {
+    chrome.storage.local.set({
+      currentTextIndex: 0
+    });
+  } else if (element.length > 1) {
+    chrome.storage.local.set({
+      currentTextIndex: results + 1
+    });
+  }
 });
