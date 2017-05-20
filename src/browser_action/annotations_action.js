@@ -101,9 +101,7 @@ app.renderNote = function(note) {
     );
   };
 
-  // var pin = JSON.parse(note);
-  var pin = {note: note};
-  app.$notes.append($.parseHTML(Note(pin.note, pin.annotation, pin.color)));
+  app.$notes.append($.parseHTML(Note(note.text, note.annotation, note.color)));
 };
 
 app.handleNoteClick = function(event) {
