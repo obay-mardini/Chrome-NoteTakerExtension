@@ -89,9 +89,13 @@ function getUsers () {
 
 //Load event listener for "Noted" button
 function notedBtn() {
-  $("#button").on("click", function(){
-    var currentUri;
+  $("#button").on("click", highlightSelectedText)
+}
 
+function highlightSelectedText(info, tab) {
+  var authResult = JSON.parse(localStorage.authResult || '{}')
+  var currentUri;
+  renderProfileView(authResult).then(() => {
     //Get current tab url
     chrome.tabs.getSelected(null, (tab) => {
       currentUri = tab.url;
@@ -118,12 +122,13 @@ function notedBtn() {
           getUsers();
         },
         error: (data) => {
-          console.log('Did not receive: ' + JSON.stringify(data));
+          console.log('Did not receive:' + JSON.stringify(data));
         }
       });
     });
   });
 }
+
 
 function annotationBtn() {
   $('#annotation-btn').on('click', function() {

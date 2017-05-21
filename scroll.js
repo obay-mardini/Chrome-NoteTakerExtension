@@ -1,5 +1,5 @@
 chrome.storage.local.get('currentTextIndex', function(results) {
-  var element = $('span.highlight');
+  var element = $('span[class^="highlight"]');
   results = results.currentTextIndex ? results.currentTextIndex : 0;
 
   if (element.length !== 0) {

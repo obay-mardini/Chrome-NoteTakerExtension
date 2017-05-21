@@ -92,7 +92,7 @@ app.renderNote = function(note) {
           <span class="pull-right">
             <div style="display: inline-block; width: 15px; height: 15px; background-color: ${color}"></div>
           </span>
-          <h3 class="panel-title" data-text=${JSON.stringify(noteText)}>${partialNoteText || noteText}</h3>
+          <h3 class="panel-title" data-text=${JSON.stringify(noteText)} data-color=${JSON.stringify(color)}>${partialNoteText || noteText}</h3>
         </div>
         <div class="panel-body">
           ${annotation}
@@ -112,11 +112,14 @@ app.handleNoteClick = function(event) {
 
   // Text to highlight
   var note = $(event.target).data('text');
-  changes.textToHighlight.push(note);
+  var color = $(event.target).data('color');
+  changes.textToHighlight.push({note: note, color: color});
 
   // Unhighlight all texts
   $('.note .panel-title').each(function(index, title) {
-    changes.textToUnhighlight.push($(title).data('text'));
+    var note = $(title).data('text');
+    var color = $(title).data('color');
+    changes.textToUnhighlight.push({note: note, color: color});
   });
 
   // Set the changes to storage so that highlight.js will know what to highlight/unhighlight.
