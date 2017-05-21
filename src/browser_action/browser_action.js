@@ -89,26 +89,28 @@ function getUsers () {
 
 //Load event listener for "Noted" button
 function notedBtn() {
-  $("#button").on("click", highlightSelectedText)
+  $("#button").on("click", function(){
+    //Get selected highlight color
+    var highlightColor = $("input[name=color]:checked").val();
+    highlightSelectedText(highlightColor);
+  });
 }
 
-function highlightSelectedText(info, tab) {
+
+function highlightSelectedText(highlightColor) {
   var authResult = JSON.parse(localStorage.authResult || '{}')
   var currentUri;
+
   renderProfileView(authResult).then(() => {
-    //Get current tab url
+  //Get current tab url
     chrome.tabs.getSelected(null, (tab) => {
       currentUri = tab.url;
     });
-
-    //Get selected highlight color
-    var highlightColor = $("input[name=color]:checked").val();
 
     //Get hightlighted text from browser
     chrome.tabs.executeScript({
       code: "window.getSelection().toString();"
     }, (selection) => {
-
       var text = selection[0];
       var note = {user_id: userID, uri: currentUri, note: text, color: highlightColor};
 
@@ -119,7 +121,6 @@ function highlightSelectedText(info, tab) {
         data: JSON.stringify(note),
         success: (data) => {
           console.log('SUCCESS!');
-          getUsers();
         },
         error: (data) => {
           console.log('Did not receive:' + JSON.stringify(data));
@@ -199,9 +200,7 @@ function renderProfileView(authResult) {
   }).then((profile) => {
     user = profile.email;
     userID = profile.user_id;
-    getUsers().then(() => {
-      selectLabel(ALL_VALUE);
-    });
+    getUsers();
     try {
       $('.loading').addClass('hidden');
       $('.note').removeClass('hidden');
@@ -243,6 +242,19 @@ function main () {
   }
 }
 
+// handle context menu actions
+function contextsMenusListener(a, b) {
+  if(a.menuItemId === 'red') {
+    highlightSelectedText('red');
+  } else if (a.menuItemId === 'green') {
+    highlightSelectedText('green');
+  } else if (a.menuItemId === 'blue') {
+    highlightSelectedText('blue');
+  } else if (a.menuItemId === 'yellow') {
+    highlightSelectedText('yellow');
+  }
+}
+
 //Injects Jquery, Jquery.highlight, and CSS into current tab
 document.addEventListener("DOMContentLoaded", () => {
   var result = chrome.tabs.executeScript(null, {file: "jquery-3.2.1.min.js"});
@@ -258,15 +270,30 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-chrome.contextMenus.onClicked.addListener(highlightSelectedText)
+chrome.contextMenus.onClicked.addListener(contextsMenusListener)
 
 chrome.runtime.onInstalled.addListener(function() {
-  var context = "selection";
-  chrome.contextMenus.create({
-      "id": "11112",
-      "title": "Note",
-      "contexts": [context]
-   }, function() {
+  var parent = chrome.contextMenus.create({"id": "parent", "title": "Note", "contexts": ["selection"]}, function() {
     alert(chrome.extension.lastError.message)
-     });
+  });
+
+  chrome.contextMenus.create(
+    {"id": "green", "title": "Green", "parentId": parent, "contexts": ["selection"]}, function() {
+      alert(chrome.extension.lastError.message)
+  });
+
+  chrome.contextMenus.create(
+    {"id": "red", "title": "Red", "parentId": parent, "contexts": ["selection"]}, function() {
+      alert(chrome.extension.lastError.message)
+  });
+
+  chrome.contextMenus.create(
+    {"id": "blue", "title": "Blue", "parentId": parent, "contexts": ["selection"]}, function() {
+      alert(chrome.extension.lastError.message)
+  });
+
+  chrome.contextMenus.create(
+    {"id": "yellow", "title": "Yellow", "parentId": parent, "contexts": ["selection"]}, function() {
+      alert(chrome.extension.lastError.message)
+  });
 });
