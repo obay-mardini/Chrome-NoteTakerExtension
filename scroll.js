@@ -4,7 +4,7 @@ chrome.storage.local.get('currentTextIndex', function(results) {
 
   if (element.length !== 0) {
     $('body').animate({
-      scrollTop: element.eq(results).offset().top
+      scrollTop: element.eq(results).offset().top - 75
     }, 500);
   }
 
