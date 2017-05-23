@@ -22,7 +22,7 @@ In addition to the functionality of the original Noted application, the Jellyfii
 
 ### Users ###
 
-Download and install the [Noted extension](https://chrome.google.com/webstore/detail/noted/lfhnbpecbkhfahjfgllalgjjalediolj/related) from the Chrome Web Store.
+Download and install the [Noted extension](https://chrome.google.com/webstore/detail/noted/nfjppfjcaoigcdpmgfokicepnmblhhfo) from the Chrome Web Store.
 
 ### Developers ###
 
