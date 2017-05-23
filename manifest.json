@@ -3,7 +3,7 @@
 
   "name": "Noted",
   "description": "This extension saves notes to a database for any url",
-  "version": "1.0",
+  "version": "0.0.1",
 
   "content_scripts": [{
     "matches": [

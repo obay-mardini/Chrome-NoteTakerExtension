@@ -75,7 +75,7 @@ function scroll() {
 //Make call to server to get User
 function getUsers () {
   return $.ajax({
-    url: 'http://localhost:3003/api/users/' + userID,
+    url: `${env.SERVER}/api/users/${userID}`,
     type: 'GET',
     success: (data) => {
       allNotes = data;
@@ -117,7 +117,7 @@ function highlightSelectedText(highlightColor) {
       $.ajax({
         type: 'POST',
         contentType: 'application/json',
-        url: 'http://localhost:3003/api/users/notes',
+        url: `${env.SERVER}/api/users/notes`,
         data: JSON.stringify(note),
         success: (data) => {
           console.log('SUCCESS!');

@@ -1,5 +1,5 @@
 var app = {
-  server: 'http://localhost:3003',
+  server: env.SERVER,
   userID: null,
   notes: [],
   tabURL: null,
